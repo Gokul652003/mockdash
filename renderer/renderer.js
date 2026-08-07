@@ -119,3 +119,70 @@ function newEndpoint() {
 
   renderEndpointList();
 }
+
+function readForm() {
+  let headers = {};
+  try {
+    headers = JSON.parse(els.epHeaders.value || '{}');
+  } catch (_e) {
+    alert('Headers must be valid JSON');
+    return null;
+  }
+
+  let body = els.epBody.value;
+  try {
+    body = JSON.parse(body);
+  } catch (_e) {
+    // keep as raw string (text response)
+  }
+
+  return {
+    id: selectedId,
+    name: els.epName.value.trim(),
+    method: els.epMethod.value,
+    path: els.epPath.value.trim() || '/',
+    status: Number(els.epStatus.value) || 200,
+    delay: Number(els.epDelay.value) || 0,
+    contentType: els.epContentType.value,
+    headers,
+    body,
+    enabled: els.enabled.checked,
+  };
+}
+
+async function save() {
+  const data = readForm();
+  if (!data) return;
+
+  let result;
+  if (editing) {
+    result = await window.api.updateEndpoint(data);
+    if (result.ok) {
+      const idx = endpoints.findIndex((e) => e.id === data.id);
+      endpoints[idx] = { ...endpoints[idx], ...result.endpoint };
+    }
+  } else {
+    const created = await window.api.addEndpoint(data);
+    endpoints.push(created);
+    selectedId = created.id;
+    editing = true;
+    els.deleteBtn.classList.remove('hidden');
+    els.editorTitle.textContent = 'Edit Endpoint';
+  }
+
+  els.saveMsg.textContent = 'Saved';
+  setTimeout(() => { els.saveMsg.textContent = ''; }, 1500);
+  renderEndpointList();
+}
+
+async function removeSelected() {
+  if (!selectedId) return;
+  if (!confirm('Delete this endpoint?')) return;
+  await window.api.removeEndpoint(selectedId);
+  endpoints = endpoints.filter((e) => e.id !== selectedId);
+  selectedId = null;
+  editing = false;
+  els.editor.classList.add('hidden');
+  els.placeholder.classList.remove('hidden');
+  renderEndpointList();
+}
