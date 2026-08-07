@@ -8,7 +8,10 @@ start the server on your chosen port, and watch incoming requests live.
 - Create/edit/delete mock endpoints with custom status, delay, headers and body
 - Route path parameters (`/api/users/:id`)
 - Response templating via `{{ expression }}`
+- Query-driven filtering on array bodies (`/users?userId=1`)
 - Live request log panel
+- Live editing: changes affect the running server as you type; Save persists
+- Endpoints persist across restarts (stored in Electron's user-data directory)
 - Start/stop the server from the sidebar
 
 ## Setup
