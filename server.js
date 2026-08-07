@@ -234,6 +234,14 @@ class MockServer {
       this.server.listen(this.port, () => {
         this.running = true;
         this._emitStatus({ running: true, port: this.port });
+        this._emitLog({
+          type: 'info',
+          method: 'SYS',
+          path: 'Mock server started',
+          status: 200,
+          duration: 0,
+          date: new Date().toISOString(),
+        });
         resolve({ ok: true, port: this.port });
       });
     });
