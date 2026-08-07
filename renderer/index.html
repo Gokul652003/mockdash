@@ -28,7 +28,83 @@
     </section>
     <ul id="endpointList" class="endpoint-list"></ul>
   </aside>
-  <main id="main"></main>
+  <main id="main">
+    <section id="editor" class="panel hidden">
+      <div class="editor-header">
+        <h2 id="editorTitle">New Endpoint</h2>
+        <div class="editor-actions">
+          <label class="enable-label">
+            <input type="checkbox" id="enabled" checked /> Enabled
+          </label>
+          <button id="deleteBtn" class="btn danger hidden">Delete</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Name (optional)</label>
+          <input type="text" id="epName" placeholder="e.g. Get user" />
+        </div>
+        <div class="field">
+          <label>Path</label>
+          <input type="text" id="epPath" placeholder="/api/users/:id" />
+        </div>
+        <div class="field">
+          <label>Method</label>
+          <select id="epMethod">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+            <option>OPTIONS</option>
+            <option>*</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status Code</label>
+          <input type="number" id="epStatus" value="200" min="100" max="599" />
+        </div>
+        <div class="field">
+          <label>Delay (ms)</label>
+          <input type="number" id="epDelay" value="0" min="0" />
+        </div>
+        <div class="field">
+          <label>Content-Type</label>
+          <select id="epContentType">
+            <option value="application/json">application/json</option>
+            <option value="text/plain">text/plain</option>
+            <option value="text/html">text/html</option>
+            <option value="application/xml">application/xml</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Headers (JSON)</label>
+        <textarea id="epHeaders" rows="2" spellcheck="false">{"X-Mock": "true"}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Response Body &mdash; templating: <code>{{request.query.name}}</code>, <code>{{request.params.id}}</code>, <code>{{request.body.email}}</code>, <code>{{random.int}}</code>, <code>{{random.guid}}</code>, <code>{{timestamp.iso}}</code></label>
+        <textarea id="epBody" rows="12" spellcheck="false">{
+  "id": "{{request.params.id}}",
+  "name": "{{request.body.name}}",
+  "createdAt": "{{timestamp.iso}}"
+}</textarea>
+      </div>
+
+      <div class="editor-actions bottom">
+        <button id="saveBtn" class="btn primary">Save Endpoint</button>
+        <span id="saveMsg"></span>
+      </div>
+    </section>
+
+    <section id="placeholder" class="panel placeholder">
+      <h2>Welcome to MockDash</h2>
+      <p>Add an endpoint from the sidebar, set the port, and press Start.</p>
+    </section>
+  </main>
   <script src="renderer.js"></script>
 </body>
 </html>
