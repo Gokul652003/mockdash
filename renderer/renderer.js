@@ -38,3 +38,36 @@ function statusClass(code) {
   if (code >= 300) return 's3xx';
   return 's2xx';
 }
+
+function renderEndpointList() {
+  const list = els.endpointList;
+  list.innerHTML = '';
+
+  if (endpoints.length === 0) {
+    list.classList.add('empty');
+    list.textContent = 'No endpoints yet. Click + Add';
+    return;
+  }
+
+  list.classList.remove('empty');
+
+  endpoints.forEach((ep) => {
+    const li = document.createElement('li');
+    li.className = 'ep-item' + (ep.id === selectedId ? ' active' : '');
+    li.dataset.id = ep.id;
+
+    const name = ep.name || ep.path;
+    li.innerHTML = `
+      <div class="ep-row">
+        <span class="ep-method">${ep.method}</span>
+        <span class="ep-path">${name}</span>
+      </div>
+      <div class="ep-meta">
+        <span class="ep-status ${statusClass(ep.status)}">${ep.status}</span>
+        <span>${ep.enabled ? '' : 'disabled'}</span>
+      </div>`;
+
+    li.addEventListener('click', () => selectEndpoint(ep.id));
+    list.appendChild(li);
+  });
+}
