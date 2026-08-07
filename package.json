@@ -22,6 +22,7 @@
       "main.js",
       "preload.js",
       "server.js",
+      "lib/**/*",
       "renderer/**/*",
       "build/icon.png",
       "build/icons/**/*"
