@@ -179,6 +179,11 @@ class MockServer {
       const rendered = this.renderBody(def.body, ctx);
       bodyStr = typeof rendered === 'string' ? rendered : JSON.stringify(rendered);
       contentType = def.contentType || 'application/json';
+
+      Object.keys(def.headers || {}).forEach((k) => {
+        if (/^content-type$/i.test(k)) return;
+        res.setHeader(k, renderTemplate(String(def.headers[k]), ctx));
+      });
     }
 
     res.statusCode = code;
