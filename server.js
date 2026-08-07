@@ -1,5 +1,9 @@
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const DEFAULT_DATA_FILE = path.join(__dirname, 'mockdash.data.json');
 
 function resolveExpr(expr, ctx) {
   const parts = expr.split('.');
@@ -68,13 +72,30 @@ function normEndpoint(ep) {
 }
 
 class MockServer {
-  constructor() {
+  constructor(options = {}) {
     this.server = null;
     this.running = false;
     this.port = 3000;
     this.endpoints = [];
     this.logListeners = [];
     this.statusListeners = [];
+    this.dataFile = options.dataFile || DEFAULT_DATA_FILE;
+    this._load();
+  }
+
+  _save() {
+    try {
+      fs.writeFileSync(this.dataFile, JSON.stringify({ endpoints: this.endpoints }, null, 2));
+    } catch (_e) { /* ignore write errors */ }
+  }
+
+  _load() {
+    try {
+      if (fs.existsSync(this.dataFile)) {
+        const data = JSON.parse(fs.readFileSync(this.dataFile, 'utf8'));
+        this.endpoints = (data.endpoints || []).map(normEndpoint);
+      }
+    } catch (_e) { this.endpoints = []; }
   }
 
   onLog(fn) { this.logListeners.push(fn); }
@@ -101,10 +122,19 @@ class MockServer {
     const id = crypto.randomBytes(8).toString('hex');
     const created = { id, ...normEndpoint(ep) };
     this.endpoints.push(created);
+    this._save();
     return created;
   }
 
   updateEndpoint(ep) {
+    const res = this.applyEndpoint(ep);
+    if (res.ok) this._save();
+    return res;
+  }
+
+  // Apply changes to the in-memory server only (no disk write).
+  // Lets live edits take effect before an explicit save/persist.
+  applyEndpoint(ep) {
     const idx = this.endpoints.findIndex((e) => e.id === ep.id);
     if (idx === -1) return { ok: false, error: 'Endpoint not found' };
     this.endpoints[idx] = { ...this.endpoints[idx], ...normEndpoint(ep), id: ep.id };
@@ -113,6 +143,7 @@ class MockServer {
 
   removeEndpoint(id) {
     this.endpoints = this.endpoints.filter((e) => e.id !== id);
+    this._save();
     return { ok: true };
   }
 
@@ -163,8 +194,21 @@ class MockServer {
     try { return decodeURIComponent(s); } catch (_e) { return s; }
   }
 
+  filterArray(items, query = {}) {
+    const keys = Object.keys(query).filter((k) =>
+      items.some((it) => it && typeof it === 'object' && k in it)
+    );
+    if (keys.length === 0) return items;
+    return items.filter((item) =>
+      keys.every((k) => item != null && String(item[k]) === String(query[k]))
+    );
+  }
+
   renderBody(template, ctx) {
     if (template == null || template === '') return '';
+    if (Array.isArray(template)) {
+      template = this.filterArray(template, ctx.query);
+    }
     if (typeof template === 'object') {
       const render = (val) => {
         if (typeof val === 'string') return renderTemplate(val, ctx);
