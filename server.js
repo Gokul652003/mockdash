@@ -1,6 +1,22 @@
 const http = require('http');
 const crypto = require('crypto');
 
+function resolveExpr(expr, ctx) {
+  const parts = expr.split('.');
+  let value = ctx[parts[0]];
+  for (let i = 1; i < parts.length && value != null; i++) {
+    value = value[parts[i]];
+  }
+  return value != null ? value : '';
+}
+
+function renderTemplate(str, ctx) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/\{\{\s*([a-zA-Z0-9._-]+)\s*\}\}/g, (_m, expr) => {
+    return String(resolveExpr(expr, ctx));
+  });
+}
+
 function matchPath(route, urlPath) {
   const routeParts = route.split('/').filter(Boolean);
   const urlParts = urlPath.split('/').filter(Boolean);
@@ -114,6 +130,24 @@ class MockServer {
 
   urlDecode(s) {
     try { return decodeURIComponent(s); } catch (_e) { return s; }
+  }
+
+  renderBody(template, ctx) {
+    if (template == null || template === '') return '';
+    if (typeof template === 'object') {
+      const render = (val) => {
+        if (typeof val === 'string') return renderTemplate(val, ctx);
+        if (Array.isArray(val)) return val.map(render);
+        if (val && typeof val === 'object') {
+          const out = {};
+          for (const k of Object.keys(val)) out[k] = render(val[k]);
+          return out;
+        }
+        return val;
+      };
+      return render(template);
+    }
+    return renderTemplate(template, ctx);
   }
 
   respond(req, res, def, ctx, startTime, status) {
