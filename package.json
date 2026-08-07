@@ -23,7 +23,8 @@
       "preload.js",
       "server.js",
       "renderer/**/*",
-      "build/icon.png"
+      "build/icon.png",
+      "build/icons/**/*"
     ],
     "directories": {
       "output": "dist"
@@ -34,7 +35,7 @@
         "deb",
         "rpm"
       ],
-      "icon": "build/icon.png",
+      "icon": "build/icons",
       "category": "Development",
       "maintainer": "Gokul KR <gokulkr652003@gmail.com>"
     }
