@@ -1,0 +1,26 @@
+:root {
+  --bg: #14161a;
+  --panel: #1c1f26;
+  --panel-2: #23262f;
+  --border: #2d313b;
+  --text: #e6e8ec;
+  --muted: #8b90a0;
+  --accent: #4f8cff;
+  --accent-dark: #3a6fd6;
+  --green: #3ecf8e;
+  --red: #ff5d5d;
+  --yellow: #f0c94a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  display: flex;
+  font-family: "Ubuntu", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  overflow: hidden;
+}
