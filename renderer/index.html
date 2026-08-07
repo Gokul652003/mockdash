@@ -7,7 +7,27 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <aside id="sidebar"></aside>
+  <aside id="sidebar">
+    <div class="brand">
+      <span class="logo">MD</span>
+      <h1>MockDash</h1>
+    </div>
+
+    <section class="server-box">
+      <label for="port">Port</label>
+      <div class="port-row">
+        <input type="number" id="port" value="3000" min="1" max="65535" />
+        <button id="toggleBtn" class="btn start">Start</button>
+      </div>
+      <div id="status" class="status stopped">Stopped</div>
+    </section>
+
+    <section class="endpoints-head">
+      <h2>Endpoints</h2>
+      <button id="addBtn" class="btn small">+ Add</button>
+    </section>
+    <ul id="endpointList" class="endpoint-list"></ul>
+  </aside>
   <main id="main"></main>
   <script src="renderer.js"></script>
 </body>
