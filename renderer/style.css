@@ -90,3 +90,66 @@ body {
 #status.running::before { background: var(--green); }
 #status.stopped { color: var(--muted); }
 #status.stopped::before { background: var(--red); }
+
+.endpoints-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 8px;
+}
+
+.endpoints-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+
+.endpoint-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px 10px;
+  list-style: none;
+}
+
+.endpoint-list.empty { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+
+.ep-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: background .12s;
+}
+
+.ep-item:hover { background: var(--panel-2); }
+
+.ep-item.active { background: var(--panel-2); border-color: var(--accent); }
+
+.ep-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ep-method {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--accent-dark);
+  color: #fff;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+
+.ep-path {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ep-meta { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: var(--muted); }
+
+.ep-status { font-weight: 600; }
+.ep-status.s2xx { color: var(--green); }
+.ep-status.s4xx, .ep-status.s5xx { color: var(--red); }
+.ep-status.s3xx { color: var(--yellow); }
