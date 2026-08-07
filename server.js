@@ -73,10 +73,17 @@ class MockServer {
     this.running = false;
     this.port = 3000;
     this.endpoints = [];
+    this.logListeners = [];
     this.statusListeners = [];
   }
 
+  onLog(fn) { this.logListeners.push(fn); }
   onStatus(fn) { this.statusListeners.push(fn); }
+
+  _emitLog(entry) {
+    entry.id = crypto.randomBytes(6).toString('hex');
+    this.logListeners.forEach((fn) => fn(entry));
+  }
 
   _emitStatus(status) {
     this.statusListeners.forEach((fn) => fn(status));
