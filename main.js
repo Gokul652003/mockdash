@@ -1,7 +1,9 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const MockServer = require('./server');
 
 let mainWindow;
+const server = new MockServer();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -20,6 +22,19 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
+
+// --- IPC: configuration ---
+ipcMain.handle('server:start', async (_e, config) => {
+  return server.start(config);
+});
+
+ipcMain.handle('server:stop', async () => {
+  return server.stop();
+});
+
+ipcMain.handle('server:getState', async () => {
+  return server.getState();
+});
 
 app.whenReady().then(() => {
   createWindow();
