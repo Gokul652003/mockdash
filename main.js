@@ -3,7 +3,9 @@ const path = require('path');
 const MockServer = require('./server');
 
 let mainWindow;
-const server = new MockServer();
+const server = new MockServer({
+  dataFile: path.join(app.getPath('userData'), 'mockdash.data.json'),
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -12,6 +14,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'MockDash',
+    icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -46,6 +49,10 @@ ipcMain.handle('endpoints:add', async (_e, ep) => {
 
 ipcMain.handle('endpoints:update', async (_e, ep) => {
   return server.updateEndpoint(ep);
+});
+
+ipcMain.handle('endpoints:apply', async (_e, ep) => {
+  return server.applyEndpoint(ep);
 });
 
 ipcMain.handle('endpoints:remove', async (_e, id) => {

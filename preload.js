@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   listEndpoints: () => ipcRenderer.invoke('endpoints:list'),
   addEndpoint: (ep) => ipcRenderer.invoke('endpoints:add', ep),
   updateEndpoint: (ep) => ipcRenderer.invoke('endpoints:update', ep),
+  applyEndpoint: (ep) => ipcRenderer.invoke('endpoints:apply', ep),
   removeEndpoint: (id) => ipcRenderer.invoke('endpoints:remove', id),
 
   onLog: (cb) => ipcRenderer.on('server:log', (_e, data) => cb(data)),

@@ -234,12 +234,64 @@ function clearLog() {
   els.logList.textContent = 'No requests yet';
 }
 
+// Live edit: apply form changes to the running server as the user types,
+// without alerting, and without persisting to disk (Save persists).
+function readLiveForm() {
+  if (!selectedId) return null;
+  let headers = {};
+  try {
+    headers = JSON.parse(els.epHeaders.value || '{}');
+  } catch (_e) {
+    return null;
+  }
+  let body = els.epBody.value;
+  try {
+    body = JSON.parse(body);
+  } catch (_e) {
+    // keep raw string (text response)
+  }
+  return {
+    id: selectedId,
+    name: els.epName.value.trim(),
+    method: els.epMethod.value,
+    path: els.epPath.value.trim() || '/',
+    status: Number(els.epStatus.value) || 200,
+    delay: Number(els.epDelay.value) || 0,
+    contentType: els.epContentType.value,
+    headers,
+    body,
+    enabled: els.enabled.checked,
+  };
+}
+
+let liveTimer = null;
+function scheduleLiveApply() {
+  if (!editing || !selectedId) return;
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(async () => {
+    const data = readLiveForm();
+    if (!data) return;
+    const res = await window.api.applyEndpoint(data);
+    if (res && res.ok) {
+      const idx = endpoints.findIndex((e) => e.id === data.id);
+      if (idx > -1) endpoints[idx] = { ...endpoints[idx], ...res.endpoint };
+      renderEndpointList();
+    }
+  }, 250);
+}
+
 // ---------- Wire up ----------
 els.addBtn.addEventListener('click', newEndpoint);
 els.saveBtn.addEventListener('click', save);
 els.deleteBtn.addEventListener('click', removeSelected);
 els.toggleBtn.addEventListener('click', toggleServer);
 els.clearLogBtn.addEventListener('click', clearLog);
+
+[els.epName, els.epPath, els.epMethod, els.epStatus, els.epDelay,
+  els.epContentType, els.epHeaders, els.epBody].forEach((el) => {
+  el.addEventListener('input', scheduleLiveApply);
+});
+els.enabled.addEventListener('change', scheduleLiveApply);
 
 window.api.onLog(addLog);
 window.api.onStatus((st) => {
