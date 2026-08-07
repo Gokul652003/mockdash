@@ -97,3 +97,25 @@ function selectEndpoint(id) {
 
   renderEndpointList();
 }
+
+function newEndpoint() {
+  selectedId = null;
+  editing = false;
+
+  els.placeholder.classList.add('hidden');
+  els.editor.classList.remove('hidden');
+  els.editorTitle.textContent = 'New Endpoint';
+  els.deleteBtn.classList.add('hidden');
+
+  els.epName.value = '';
+  els.epPath.value = '/api/example';
+  els.epMethod.value = 'GET';
+  els.epStatus.value = 200;
+  els.epDelay.value = 0;
+  els.epContentType.value = 'application/json';
+  els.epHeaders.value = '{\n  "X-Mock": "true"\n}';
+  els.epBody.value = '{\n  "message": "hello world"\n}';
+  els.enabled.checked = true;
+
+  renderEndpointList();
+}
