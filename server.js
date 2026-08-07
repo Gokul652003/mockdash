@@ -1,4 +1,19 @@
 const http = require('http');
+const crypto = require('crypto');
+
+function normEndpoint(ep) {
+  return {
+    name: ep.name || '',
+    method: ep.method || 'GET',
+    path: ep.path || '/',
+    status: Number(ep.status) || 200,
+    delay: Number(ep.delay) || 0,
+    contentType: ep.contentType || 'application/json',
+    headers: ep.headers || {},
+    body: ep.body ?? {},
+    enabled: ep.enabled !== false,
+  };
+}
 
 class MockServer {
   constructor() {
@@ -17,6 +32,29 @@ class MockServer {
 
   getState() {
     return { running: this.running, port: this.port };
+  }
+
+  getEndpoints() {
+    return this.endpoints.map((ep) => ({ ...ep }));
+  }
+
+  addEndpoint(ep) {
+    const id = crypto.randomBytes(8).toString('hex');
+    const created = { id, ...normEndpoint(ep) };
+    this.endpoints.push(created);
+    return created;
+  }
+
+  updateEndpoint(ep) {
+    const idx = this.endpoints.findIndex((e) => e.id === ep.id);
+    if (idx === -1) return { ok: false, error: 'Endpoint not found' };
+    this.endpoints[idx] = { ...this.endpoints[idx], ...normEndpoint(ep), id: ep.id };
+    return { ok: true, endpoint: this.endpoints[idx] };
+  }
+
+  removeEndpoint(id) {
+    this.endpoints = this.endpoints.filter((e) => e.id !== id);
+    return { ok: true };
   }
 
   start(config = {}) {
