@@ -52,6 +52,20 @@ ipcMain.handle('endpoints:remove', async (_e, id) => {
   return server.removeEndpoint(id);
 });
 
+// Live request logs -> push to renderer
+server.onLog((entry) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('server:log', entry);
+  }
+});
+
+// Server state changes (started/stopped) -> push to renderer
+server.onStatus((status) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('server:status', status);
+  }
+});
+
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {
@@ -61,4 +75,8 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  server.stop();
 });
