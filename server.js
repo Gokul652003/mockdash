@@ -176,7 +176,7 @@ class MockServer {
     return renderTemplate(template, ctx);
   }
 
-  respond(req, res, def, ctx, startTime, status) {
+  respond(req, res, def, ctx, startTime, status, matched) {
     const delay = Number(def ? def.delay : 0) || 0;
 
     const send = () => {
@@ -199,6 +199,16 @@ class MockServer {
       res.statusCode = code;
       res.setHeader('Content-Type', contentType);
       res.end(bodyStr);
+
+      this._emitLog({
+        type: 'request',
+        endpoint: matched ? matched.def.name || matched.def.path : null,
+        method: req.method,
+        path: req.url,
+        status: code,
+        duration: Date.now() - startTime,
+        date: new Date().toISOString(),
+      });
     };
 
     if (delay > 0) setTimeout(send, delay);
