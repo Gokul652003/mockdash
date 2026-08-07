@@ -71,3 +71,29 @@ function renderEndpointList() {
     list.appendChild(li);
   });
 }
+
+function selectEndpoint(id) {
+  const ep = endpoints.find((e) => e.id === id);
+  if (!ep) return;
+  selectedId = id;
+  editing = true;
+
+  els.placeholder.classList.add('hidden');
+  els.editor.classList.remove('hidden');
+  els.editorTitle.textContent = 'Edit Endpoint';
+  els.deleteBtn.classList.remove('hidden');
+
+  els.epName.value = ep.name || '';
+  els.epPath.value = ep.path || '';
+  els.epMethod.value = ep.method || 'GET';
+  els.epStatus.value = ep.status;
+  els.epDelay.value = ep.delay;
+  els.epContentType.value = ep.contentType || 'application/json';
+  els.epHeaders.value = JSON.stringify(ep.headers || {}, null, 2);
+  els.epBody.value = typeof ep.body === 'string'
+    ? ep.body
+    : JSON.stringify(ep.body ?? {}, null, 2);
+  els.enabled.checked = ep.enabled !== false;
+
+  renderEndpointList();
+}
