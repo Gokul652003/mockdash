@@ -170,25 +170,32 @@ class MockServer {
   }
 
   respond(req, res, def, ctx, startTime, status) {
-    let bodyStr = '{"error":"Not Found"}';
-    let contentType = 'application/json';
-    let code = 404;
+    const delay = Number(def ? def.delay : 0) || 0;
 
-    if (def) {
-      code = status;
-      const rendered = this.renderBody(def.body, ctx);
-      bodyStr = typeof rendered === 'string' ? rendered : JSON.stringify(rendered);
-      contentType = def.contentType || 'application/json';
+    const send = () => {
+      let bodyStr = '{"error":"Not Found"}';
+      let contentType = 'application/json';
+      let code = 404;
 
-      Object.keys(def.headers || {}).forEach((k) => {
-        if (/^content-type$/i.test(k)) return;
-        res.setHeader(k, renderTemplate(String(def.headers[k]), ctx));
-      });
-    }
+      if (def) {
+        code = status;
+        const rendered = this.renderBody(def.body, ctx);
+        bodyStr = typeof rendered === 'string' ? rendered : JSON.stringify(rendered);
+        contentType = def.contentType || 'application/json';
 
-    res.statusCode = code;
-    res.setHeader('Content-Type', contentType);
-    res.end(bodyStr);
+        Object.keys(def.headers || {}).forEach((k) => {
+          if (/^content-type$/i.test(k)) return;
+          res.setHeader(k, renderTemplate(String(def.headers[k]), ctx));
+        });
+      }
+
+      res.statusCode = code;
+      res.setHeader('Content-Type', contentType);
+      res.end(bodyStr);
+    };
+
+    if (delay > 0) setTimeout(send, delay);
+    else send();
   }
 
   start(config = {}) {
