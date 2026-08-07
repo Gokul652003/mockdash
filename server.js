@@ -1,6 +1,23 @@
 const http = require('http');
 const crypto = require('crypto');
 
+function matchPath(route, urlPath) {
+  const routeParts = route.split('/').filter(Boolean);
+  const urlParts = urlPath.split('/').filter(Boolean);
+  if (routeParts.length !== urlParts.length) return null;
+  const params = {};
+  for (let i = 0; i < routeParts.length; i++) {
+    const r = routeParts[i];
+    const u = urlParts[i];
+    if (r.startsWith(':')) {
+      params[r.slice(1)] = u;
+    } else if (r !== u) {
+      return null;
+    }
+  }
+  return params;
+}
+
 function normEndpoint(ep) {
   return {
     name: ep.name || '',
@@ -57,15 +74,73 @@ class MockServer {
     return { ok: true };
   }
 
+  matchEndpoint(method, pathname) {
+    for (const ep of this.endpoints) {
+      if (ep.method !== '*' && ep.method !== method) continue;
+      const params = matchPath(ep.path, pathname);
+      if (params) return { def: ep, params };
+    }
+    return null;
+  }
+
+  handleRequest(req, res, startTime) {
+    let body = '';
+    req.on('data', (c) => { body += c; });
+    req.on('end', () => {
+      let parsedBody = null;
+      try { parsedBody = body ? JSON.parse(body) : null; } catch (_e) { parsedBody = body; }
+
+      const url = new URL(req.url, 'http://localhost');
+      const pathname = this.urlDecode(url.pathname);
+      const query = Object.fromEntries(url.searchParams.entries());
+      const ctx = { request: { query, params: {}, body: parsedBody, header: req.headers } };
+      ctx.query = query;
+      ctx.params = {};
+      ctx.body = parsedBody;
+      ctx.header = req.headers;
+
+      const matched = this.matchEndpoint(req.method, pathname);
+      if (!matched) {
+        this.respond(req, res, null, ctx, startTime, 404, null);
+        return;
+      }
+
+      ctx.params = matched.params;
+      ctx.request.params = matched.params;
+
+      this.respond(req, res, matched.def, ctx, startTime, matched.def.status, matched);
+    });
+  }
+
+  urlDecode(s) {
+    try { return decodeURIComponent(s); } catch (_e) { return s; }
+  }
+
+  respond(req, res, def, ctx, startTime, status) {
+    let bodyStr = '{"error":"Not Found"}';
+    let contentType = 'application/json';
+    let code = 404;
+
+    if (def) {
+      code = status;
+      const rendered = this.renderBody(def.body, ctx);
+      bodyStr = typeof rendered === 'string' ? rendered : JSON.stringify(rendered);
+      contentType = def.contentType || 'application/json';
+    }
+
+    res.statusCode = code;
+    res.setHeader('Content-Type', contentType);
+    res.end(bodyStr);
+  }
+
   start(config = {}) {
     if (this.running) return { ok: false, error: 'Server already running' };
 
     this.port = Number(config.port) || 3000;
 
     this.server = http.createServer((req, res) => {
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'application/json');
-      res.end('{"error":"Not Found"}');
+      const startTime = Date.now();
+      this.handleRequest(req, res, startTime);
     });
 
     return new Promise((resolve) => {
@@ -96,3 +171,4 @@ class MockServer {
 }
 
 module.exports = MockServer;
+module.exports.matchPath = matchPath;
