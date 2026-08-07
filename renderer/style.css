@@ -57,3 +57,36 @@ body {
 }
 
 .brand h1 { font-size: 17px; font-weight: 600; }
+
+.server-box {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.server-box label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+.port-row { display: flex; gap: 8px; margin-top: 8px; }
+
+.port-row input { flex: 1; }
+
+#status {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+#status.running { color: var(--green); }
+#status.running::before { background: var(--green); }
+#status.stopped { color: var(--muted); }
+#status.stopped::before { background: var(--red); }
