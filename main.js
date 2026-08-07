@@ -36,6 +36,22 @@ ipcMain.handle('server:getState', async () => {
   return server.getState();
 });
 
+ipcMain.handle('endpoints:list', async () => {
+  return server.getEndpoints();
+});
+
+ipcMain.handle('endpoints:add', async (_e, ep) => {
+  return server.addEndpoint(ep);
+});
+
+ipcMain.handle('endpoints:update', async (_e, ep) => {
+  return server.updateEndpoint(ep);
+});
+
+ipcMain.handle('endpoints:remove', async (_e, id) => {
+  return server.removeEndpoint(id);
+});
+
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {
