@@ -1,6 +1,6 @@
 {
   "name": "mockdash",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Linux mock server desktop app with sidebar",
   "main": "main.js",
   "scripts": {
