@@ -150,6 +150,11 @@ class MockServer {
       ctx.params = matched.params;
       ctx.request.params = matched.params;
 
+      if (!matched.def.enabled) {
+        this.respond(req, res, null, ctx, startTime, 403, matched);
+        return;
+      }
+
       this.respond(req, res, matched.def, ctx, startTime, matched.def.status, matched);
     });
   }
